@@ -21,8 +21,8 @@ public class ConsumerPool {
 	private String queueName;
 
 	private Connection connection;
-	private final HashSet<ConsumerWorker> consumerWorkers = new HashSet<ConsumerWorker>();
 	private final int consumerCount;
+	private final HashSet<ConsumerWorker> consumerWorkers = new HashSet<ConsumerWorker>();
 
 	public ConsumerPool(String user, String password, String url,
 			String queueName, int consumerCount) {
@@ -32,7 +32,7 @@ public class ConsumerPool {
 		this.queueName = queueName;
 		this.consumerCount = consumerCount;
 	}
-	
+
 	public void terminate() {
 		System.out.println("entering ConsumerPool.terminate");
 
@@ -79,18 +79,18 @@ public class ConsumerPool {
 		try {
 			for (int i = 0; i < consumerCount; i++) {
 				consumerWorkers.add(new ConsumerWorker(connection.createSession(false,
-						Session.AUTO_ACKNOWLEDGE), this.queueName, i+1));
+						Session.AUTO_ACKNOWLEDGE), this.queueName, i + 1));
 			}
 
 		} catch (JMSException e) {
 			e.printStackTrace();
 			closeConnection();
 		}
-		
+
 		for (ConsumerWorker worker : consumerWorkers) {
 			worker.start();
 		}
-		
+
 		System.out.println("exiting ConsumerPool.run");
 	}
 
@@ -123,12 +123,23 @@ class ConsumerWorker extends Thread {
 
 	private void closeMessageConsumer() {
 		System.out.println("entering ConsumerWorker.closeMessageConsumer");
-		try {
-			messageConsumer.close();
-			session.close();
-		} catch (JMSException e) {
-			e.printStackTrace();
+
+		if (messageConsumer != null) {
+			try {
+				messageConsumer.close();
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
 		}
+
+		if (session != null) {
+			try {
+				session.close();
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
+
 		System.out.println("exiting ConsumerWorker.closeMessageConsumer");
 	}
 
@@ -170,7 +181,7 @@ class ConsumerWorker extends Thread {
 					((ITask) ((ObjectMessage) task).getObject()).run();
 				}
 			} catch (InterruptedException e) {
-				 e.printStackTrace();
+				e.printStackTrace();
 			} catch (JMSException e) {
 				e.printStackTrace();
 			}

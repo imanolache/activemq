@@ -39,7 +39,7 @@ public class ProducerThread extends Thread {
 		this.url = url;
 		this.queueName = queueName;
 		this.persistent = persistent;
-		this.limit = limit;
+		this.limit = limit;//limit number of JMS messages
 	}
 
 	public void terminate() {
@@ -47,18 +47,28 @@ public class ProducerThread extends Thread {
 	}
 
 	private void closeMessageProducer() {
-		try {
-			if (this.messageProducer != null) {
+		if (this.messageProducer != null) {
+			try {
 				this.messageProducer.close();
+			} catch (JMSException e) {
+				e.printStackTrace();
 			}
-			if (this.session != null) {
+		}
+		
+		if (this.session != null) {
+			try {
 				this.session.close();
+			} catch (JMSException e) {
+				e.printStackTrace();
 			}
-			if (this.messageProducer != null) {
-				this.messageProducer.close();
+		}
+		
+		if (this.connection != null) {
+			try {
+				this.connection.close();
+			} catch (JMSException e) {
+				e.printStackTrace();
 			}
-		} catch (JMSException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -93,12 +103,8 @@ public class ProducerThread extends Thread {
 			while (running) {
 				ITask jmsMessage = new JmsTask("jms task " + (++index));
 
-				// System.out.println(message.toString());
-
-				ObjectMessage o = null;
-
 				try {
-					o = session.createObjectMessage(jmsMessage);
+					ObjectMessage o = session.createObjectMessage(jmsMessage);
 					messageProducer.send(o);
 				} catch (JMSException ex) {
 					ex.printStackTrace();

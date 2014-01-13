@@ -5,10 +5,11 @@ import org.apache.activemq.ActiveMQConnection;
 public class App {
 
 	public static void main(String[] args) throws Exception {
+		
 		final String connectorUri = "vm://localhost?async=false";
 		final String user = ActiveMQConnection.DEFAULT_USER;
 		final String password = ActiveMQConnection.DEFAULT_PASSWORD;
-		final String amqPersistenceAdapterDirectory = "d:/ActiveMQ";
+		final String amqPersistenceAdapterDirectory = "c:/activeMQ-data";
 
 		System.out.println("Hello World ActiveMQ!");
 
